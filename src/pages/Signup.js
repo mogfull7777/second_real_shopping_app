@@ -1,7 +1,8 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Button, Col, Container, Form, Row} from "react-bootstrap";
 import {Link, useNavigate} from "react-router-dom";
 import axios from "axios";
+import {useDispatch, useSelector} from "react-redux";
 
 const Signup = () => {
 
@@ -63,6 +64,11 @@ const Signup = () => {
 
     }
 
+    const dispatch = useDispatch()
+
+    const userLogin = useSelector((state) => state.userLogin)
+    const { loading, error, userInfo } = userLogin
+
     const signupSubmitHendle = async (e) => {
         e.preventDefault()
 
@@ -114,6 +120,12 @@ const Signup = () => {
         }
 
     }
+
+    useEffect(() => {
+        if (userInfo) {
+            navigate('/profile')
+        }
+    }, [userInfo])
 
     return (
         <Container>

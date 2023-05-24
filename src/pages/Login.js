@@ -1,7 +1,9 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Button, Col, Container, Form, Row} from "react-bootstrap";
 import {Link, useNavigate} from "react-router-dom";
 import axios from "axios";
+import {useDispatch, useSelector} from "react-redux";
+import {login} from "../actions/userActions";
 
 const Login = () => {
 
@@ -10,37 +12,52 @@ const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
+    const dispatch = useDispatch();
+
+    const userLogin = useSelector((state) => state.userLogin)
+    const { loading, error, userInfo } = userLogin
+
     const loginSubmitHendle = async (e) => {
         e.preventDefault()
-
-        try {
-
-            const loginList = {
-                email : email,
-                password : password
-            }
-
-            const loginInfo = await axios.post("http://localhost:3000/api/auth/login", loginList)
-
-            console.log("^^^^^^^^^^^^^", loginInfo)
-
-            if (loginInfo.status === 200) {
-
-                alert('login success')
-
-                localStorage.setItem("token", loginInfo.data.currentHashedRefreshToken)
-
-                navigate('/profile')
-
-            }
-
-        //      쿠키에서 어떻게 토큰을 빼올까?
-
-        } catch (err) {
-            console.log(err)
-
-        }
+        dispatch(login(email, password))
     }
+    // const loginSubmitHendle = async (e) => {
+    //     e.preventDefault()
+    //
+    //     try {
+    //
+    //         const loginList = {
+    //             email : email,
+    //             password : password
+    //         }
+    //
+    //         const loginInfo = await axios.post("http://localhost:3000/api/auth/login", loginList)
+    //
+    //         console.log("^^^^^^^^^^^^^", loginInfo)
+    //
+    //         if (loginInfo.status === 200) {
+    //
+    //             alert('login success')
+    //
+    //             localStorage.setItem("token", loginInfo.data.currentHashedRefreshToken)
+    //
+    //             navigate('/profile')
+    //
+    //         }
+    //
+    //     //      쿠키에서 어떻게 토큰을 빼올까?
+    //
+    //     } catch (err) {
+    //         console.log(err)
+    //
+    //     }
+    // }
+
+    useEffect(() => {
+        if (userInfo) {
+            navigate('/profile')
+        }
+    }, [userInfo])
 
 
 
