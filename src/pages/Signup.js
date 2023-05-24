@@ -12,9 +12,60 @@ const Signup = () => {
     const [confirm, setConfirm] = useState("");
     const [username, setUsername] = useState("");
     const [phoneNumber, setPhoneNumber] = useState("");
+    const [fourtin, setFourtin] = useState(false);
+    const [yesIUsed, setyesIUsed] = useState(false);
+    const [agreed, setagreed] = useState(false);
+    const [phoneVerufication, setPhoneVerufication] = useState(false);
+
+    const [open, setOpen] = useState(false);
+    const [code, setCode] = useState(0);
+
+    const sendSNS = async (e) => {
+        e.preventDefault()
+
+        try {
+
+            const findEmailList = {phone: phoneNumber}
+
+            console.log(findEmailList)
+
+            const findEmailInfo = await axios.post("http://localhost:3000/api/auth/phone/verification", findEmailList)
+
+            console.log("&&&&&&&&&&&", findEmailInfo)
+
+            if (findEmailInfo.status === 201) {
+
+                setOpen(true)
+
+            }
+
+        } catch (err) {
+            console.log(err.message)
+        }
+    }
+
+    const verificationCodeByPhone = async (e) => {
+        e.preventDefault()
+
+        const userInput = {
+            phone: phoneNumber,
+            code : code
+        }
+
+        console.log(userInput)
+
+        const codeSucces = await axios.post('http://localhost:3000/api/auth/phone/check', userInput)
+
+        if (codeSucces.status === 201) {
+            alert("인증되었습니다.")
+            setPhoneVerufication(true)
+        }
+
+    }
 
     const signupSubmitHendle = async (e) => {
         e.preventDefault()
+
 
         try{
 
@@ -24,7 +75,26 @@ const Signup = () => {
                 confirm : confirm,
                 username : username,
                 phone : phoneNumber
+
             }
+
+            // 조건
+
+            if (!fourtin || !agreed || !yesIUsed) {
+                alert("회원가입이 되지 않습니다.")
+                return;
+            } else if (email === "" || password === "" || username === "" || phoneNumber === ""){
+                alert("입력되지 않은 항목이 있습니다.")
+                return;
+            } else if (password !== confirm) {
+                alert("패스워드를 확인해주세요.")
+                return;
+            } else if (!phoneVerufication) {
+                alert("핸드폰을 인증해주셔야합니다.")
+                return;
+            }
+
+
 
             const signUpInfo = await axios.post('http://localhost:3000/api/auth/signup', signUpList)
 
@@ -36,8 +106,8 @@ const Signup = () => {
 
                 navigate('/login')
 
-
             }
+
 
         } catch (err) {
             console.log(err.massage)
@@ -105,9 +175,27 @@ const Signup = () => {
                                 type='phonenumber'
                                 placeholder='+082를 포함한 핸드폰 번호를 입력해주세요.'
                                 value={phoneNumber}
-                                onChange={e => setPhoneNumber(e.target.value)}
+                                onChange={e=> setPhoneNumber(e.target.value)}
                             />
                         </Form.Group>
+
+                        <Button onClick={sendSNS}>보내기</Button>
+
+                        {open ? (
+                            <Form.Group className="mb-4" controlId="fromBasicUsername">
+                                <Form.Label>인증번호</Form.Label>
+                                <Form.Control
+                                    type='text'
+                                    placeholder='인증번호를 입력해주세요.'
+                                    value={code}
+                                    onChange={e => setCode(e.target.value)}
+                                />
+                            </Form.Group>
+
+                        ) : null}
+
+                        <Button onClick={verificationCodeByPhone}>인증하기</Button>
+
 
                         <Form.Group className="mb-3" controlId="formBasicCheckbox">
                             <Form.Check
@@ -122,16 +210,22 @@ const Signup = () => {
                                 className="mb-3"
                                 type="checkbox"
                                 label="만 14세 이상입니다.(필수)"
+                                value={fourtin}
+                                onChange={e => setFourtin(e.target.checked)}
                             />
                             <Form.Check
                                 className="mb-3"
                                 type="checkbox"
                                 label="이용약관 (필수)"
+                                value={yesIUsed}
+                                onChange={e => setyesIUsed(e.target.checked)}
                             />
                             <Form.Check
                                 className="mb-3"
                                 type="checkbox"
                                 label="개인정보수집 및 이용동의 (필수)"
+                                value={agreed}
+                                onChange={e => setagreed(e.target.checked)}
                             />
                             <Form.Check
                                 className="mb-3"
