@@ -1,8 +1,9 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {Button, Col, Container, Form, Row} from "react-bootstrap";
 import {Link, useNavigate} from "react-router-dom";
 import axios from "axios";
 import {useDispatch, useSelector} from "react-redux";
+import data from "bootstrap/js/src/dom/data";
 
 const Signup = () => {
 
@@ -13,13 +14,45 @@ const Signup = () => {
     const [confirm, setConfirm] = useState("");
     const [username, setUsername] = useState("");
     const [phoneNumber, setPhoneNumber] = useState("");
-    const [fourtin, setFourtin] = useState(false);
-    const [yesIUsed, setyesIUsed] = useState(false);
-    const [agreed, setagreed] = useState(false);
+
+    // const [allCheck, setAllCheck] = useState(false);
+    // const [fourtin, setFourtin] = useState(false);
+    // const [yesIUsed, setyesIUsed] = useState(false);
+    // const [agreed, setagreed] = useState(false);
+
     const [phoneVerufication, setPhoneVerufication] = useState(false);
+
+    const checkData = [
+        {id : 0, title : '만 14세 이상입니다.(필수)', value : false},
+        {id : 1, title : '이용약관 (필수)', value : false},
+        {id : 2, title : '개인정보수집 및 이용동의 (필수)', value : false},
+        {id : 3, title : '개인정보 마케팅 활용 동의 (선택)'},
+        {id : 4, title : '이벤트, 쿠폰, 특가 알림 메일 및 SMS 등 수신 (선택)'}
+    ]
+
+    const [checkItems, setCheckItems] = useState([]);
+
+    const handleSingleCheck = (checked, id) => {
+        if (checked) {
+            setCheckItems(prev => [...prev, id]);
+        } else {
+            setCheckItems(checkItems.filter((el) => el !== id));
+        }
+    };
+
+    const hendleAllCheck = (checked) => {
+        if (checked) {
+            const idArray = [];
+            checkData.forEach((el) => idArray.push(el.id));
+            setCheckItems(idArray);
+        } else {
+            setCheckItems([]);
+        }
+    }
 
     const [open, setOpen] = useState(false);
     const [code, setCode] = useState(0);
+
 
     const sendSNS = async (e) => {
         e.preventDefault()
@@ -69,6 +102,7 @@ const Signup = () => {
     const userLogin = useSelector((state) => state.userLogin)
     const { loading, error, userInfo } = userLogin
 
+
     const signupSubmitHendle = async (e) => {
         e.preventDefault()
 
@@ -86,7 +120,7 @@ const Signup = () => {
 
             // 조건
 
-            if (!fourtin || !agreed || !yesIUsed) {
+            if (!checkData.id(0) === false || !checkData.id(1) === false || !checkData.id(2) === false ) {
                 alert("회원가입이 되지 않습니다.")
                 return;
             } else if (email === "" || password === "" || username === "" || phoneNumber === ""){
@@ -99,6 +133,7 @@ const Signup = () => {
                 alert("핸드폰을 인증해주셔야합니다.")
                 return;
             }
+
 
 
 
@@ -211,44 +246,58 @@ const Signup = () => {
 
                         <Form.Group className="mb-3" controlId="formBasicCheckbox">
                             <Form.Check
-                                className="mb-3 pb-3"
+                                className="my-3 pb-3"
                                 type="checkbox"
                                 label="전체동의"
                                 style={{
                                     borderBottom: '1px solid black'
                                 }}
+                                onChange={(e) => hendleAllCheck(e.target.checked)}
+                                checked={checkItems.length === checkData.length ? true : false}
                             />
-                            <Form.Check
-                                className="mb-3"
-                                type="checkbox"
-                                label="만 14세 이상입니다.(필수)"
-                                value={fourtin}
-                                onChange={e => setFourtin(e.target.checked)}
-                            />
-                            <Form.Check
-                                className="mb-3"
-                                type="checkbox"
-                                label="이용약관 (필수)"
-                                value={yesIUsed}
-                                onChange={e => setyesIUsed(e.target.checked)}
-                            />
-                            <Form.Check
-                                className="mb-3"
-                                type="checkbox"
-                                label="개인정보수집 및 이용동의 (필수)"
-                                value={agreed}
-                                onChange={e => setagreed(e.target.checked)}
-                            />
-                            <Form.Check
-                                className="mb-3"
-                                type="checkbox"
-                                label="개인정보 마케팅 활용 동의 (선택)"
-                            />
-                            <Form.Check
-                                className="mb-3"
-                                type="checkbox"
-                                label="이벤트, 쿠폰, 특가 알림 메일 및 SMS 등 수신 (선택)"
-                            />
+
+                            {checkData?.map((checkData, key) => (
+                                <Form.Check
+                                    className="my-1"
+                                    key={key}
+                                    id={`${checkData.id}`}
+                                    label={checkData.title}
+                                    type="checkbox"
+                                    onChange={(e) => handleSingleCheck(e.target.checked, checkData.id)}
+                                    checked={checkItems.includes(checkData.id) ? true : false}
+                                />
+                            ))}
+
+                            {/*<Form.Check*/}
+                            {/*    id={1}*/}
+                            {/*    className="mb-3"*/}
+                            {/*    type="checkbox"*/}
+                            {/*    label="만 14세 이상입니다.(필수)"*/}
+                            {/*/>*/}
+                            {/*<Form.Check*/}
+                            {/*    id={2}*/}
+                            {/*    className="mb-3"*/}
+                            {/*    type="checkbox"*/}
+                            {/*    label="이용약관 (필수)"*/}
+                            {/*/>*/}
+                            {/*<Form.Check*/}
+                            {/*    id={3}*/}
+                            {/*    className="mb-3"*/}
+                            {/*    type="checkbox"*/}
+                            {/*    label="개인정보수집 및 이용동의 (필수)"*/}
+                            {/*/>*/}
+                            {/*<Form.Check*/}
+                            {/*    id={4}*/}
+                            {/*    className="mb-3"*/}
+                            {/*    type="checkbox"*/}
+                            {/*    label="개인정보 마케팅 활용 동의 (선택)"*/}
+                            {/*/>*/}
+                            {/*<Form.Check*/}
+                            {/*    id={5}*/}
+                            {/*    className="mb-3"*/}
+                            {/*    type="checkbox"*/}
+                            {/*    label="이벤트, 쿠폰, 특가 알림 메일 및 SMS 등 수신 (선택)"*/}
+                            {/*/>*/}
                         </Form.Group>
 
 
