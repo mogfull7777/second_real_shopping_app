@@ -57,7 +57,7 @@ const Login = () => {
         if (userInfo) {
             navigate('/profile')
         }
-    }, [userInfo])
+    }, [navigate, userInfo])
 
 
 

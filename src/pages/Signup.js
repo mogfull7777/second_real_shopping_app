@@ -4,16 +4,19 @@ import {Link, useNavigate} from "react-router-dom";
 import axios from "axios";
 import {useDispatch, useSelector} from "react-redux";
 import data from "bootstrap/js/src/dom/data";
+import {signup} from "../actions/userActions";
 
 const Signup = () => {
 
-    const navigate = useNavigate()
+    const navigate = useNavigate();
+
+    const dispatch = useDispatch();
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirm, setConfirm] = useState("");
     const [username, setUsername] = useState("");
-    const [phoneNumber, setPhoneNumber] = useState("");
+    const [phone, setPhoneNumber] = useState("");
 
     // const [allCheck, setAllCheck] = useState(false);
     // const [fourtin, setFourtin] = useState(false);
@@ -23,11 +26,11 @@ const Signup = () => {
     const [phoneVerufication, setPhoneVerufication] = useState(false);
 
     const checkData = [
-        {id : 0, title : '만 14세 이상입니다.(필수)', value : false},
-        {id : 1, title : '이용약관 (필수)', value : false},
-        {id : 2, title : '개인정보수집 및 이용동의 (필수)', value : false},
-        {id : 3, title : '개인정보 마케팅 활용 동의 (선택)'},
-        {id : 4, title : '이벤트, 쿠폰, 특가 알림 메일 및 SMS 등 수신 (선택)'}
+        {id : 1, title : '만 14세 이상입니다.(필수)', value : false},
+        {id : 2, title : '이용약관 (필수)', value : false},
+        {id : 3, title : '개인정보수집 및 이용동의 (필수)', value : false},
+        {id : 4, title : '개인정보 마케팅 활용 동의 (선택)'},
+        {id : 5, title : '이벤트, 쿠폰, 특가 알림 메일 및 SMS 등 수신 (선택)'}
     ]
 
     const [checkItems, setCheckItems] = useState([]);
@@ -59,7 +62,7 @@ const Signup = () => {
 
         try {
 
-            const findEmailList = {phone: phoneNumber}
+            const findEmailList = {phone: phone}
 
             console.log(findEmailList)
 
@@ -82,7 +85,7 @@ const Signup = () => {
         e.preventDefault()
 
         const userInput = {
-            phone: phoneNumber,
+            phone: phone,
             code : code
         }
 
@@ -97,70 +100,82 @@ const Signup = () => {
 
     }
 
-    const dispatch = useDispatch()
 
-    const userLogin = useSelector((state) => state.userLogin)
-    const { loading, error, userInfo } = userLogin
-
-
-    const signupSubmitHendle = async (e) => {
-        e.preventDefault()
-
-
-        try{
-
-            const signUpList = {
-                email : email,
-                password : password,
-                confirm : confirm,
-                username : username,
-                phone : phoneNumber
-
-            }
-
-            // 조건
-
-            if (!checkData.id(0) === false || !checkData.id(1) === false || !checkData.id(2) === false ) {
-                alert("회원가입이 되지 않습니다.")
-                return;
-            } else if (email === "" || password === "" || username === "" || phoneNumber === ""){
-                alert("입력되지 않은 항목이 있습니다.")
-                return;
-            } else if (password !== confirm) {
-                alert("패스워드를 확인해주세요.")
-                return;
-            } else if (!phoneVerufication) {
-                alert("핸드폰을 인증해주셔야합니다.")
-                return;
-            }
-
-
-
-
-            const signUpInfo = await axios.post('http://localhost:3000/api/auth/signup', signUpList)
-
-            console.log('$$$$$$$$$$$$$$', signUpInfo)
-
-            if (signUpInfo.status === 201) {
-
-                alert( 'Welcome!' )
-
-                navigate('/login')
-
-            }
-
-
-        } catch (err) {
-            console.log(err.massage)
-        }
-
-    }
+    const userSignUp = useSelector((state) => state.userSignUp)
+    const {loading, error, result} = userSignUp
 
     useEffect(() => {
-        if (userInfo) {
-            navigate('/profile')
+        if (result) {
+            navigate('/login')
         }
-    }, [userInfo])
+    }, [ navigate, result ])
+
+
+    const signupSubmitHendle = (e) => {
+        e.preventDefault()
+        dispatch(signup (email, password, username, phone))
+    }
+
+
+
+    // const signupSubmitHendle = async (e) => {
+    //     e.preventDefault()
+    //
+    //
+    //     try{
+    //
+    //         const signUpList = {
+    //             email : email,
+    //             password : password,
+    //             confirm : confirm,
+    //             username : username,
+    //             phone : phoneNumber
+    //
+    //         }
+    //
+    //         // 조건
+    //
+    //         if (!checkData.id(0) === false || !checkData.id(1) === false || !checkData.id(2) === false ) {
+    //             alert("회원가입이 되지 않습니다.")
+    //             return;
+    //         } else if (email === "" || password === "" || username === "" || phoneNumber === ""){
+    //             alert("입력되지 않은 항목이 있습니다.")
+    //             return;
+    //         } else if (password !== confirm) {
+    //             alert("패스워드를 확인해주세요.")
+    //             return;
+    //         } else if (!phoneVerufication) {
+    //             alert("핸드폰을 인증해주셔야합니다.")
+    //             return;
+    //         }
+    //
+    //
+    //
+    //
+    //         const signUpInfo = await axios.post('http://localhost:3000/api/auth/signup', signUpList)
+    //
+    //         console.log('$$$$$$$$$$$$$$', signUpInfo)
+    //
+    //         if (signUpInfo.status === 201) {
+    //
+    //             alert( 'Welcome!' )
+    //
+    //             navigate('/login')
+    //
+    //         }
+
+
+    //     } catch (err) {
+    //         console.log(err.massage)
+    //     }
+    //
+    // }
+
+    // useEffect(() => {
+    //     if (userInfo) {
+    //         navigate('/profile')
+    //     }
+    // }, [userInfo])
 
     return (
         <Container>
@@ -220,8 +235,8 @@ const Signup = () => {
                             <Form.Label>전화번호</Form.Label>
                             <Form.Control
                                 type='phonenumber'
-                                placeholder='+082를 포함한 핸드폰 번호를 입력해주세요.'
-                                value={phoneNumber}
+                                placeholder='+82를 포함한 핸드폰 번호를 입력해주세요.'
+                                value={phone}
                                 onChange={e=> setPhoneNumber(e.target.value)}
                             />
                         </Form.Group>
@@ -260,7 +275,7 @@ const Signup = () => {
                                 <Form.Check
                                     className="my-1"
                                     key={key}
-                                    id={`${checkData.id}`}
+                                    id={checkData.id}
                                     label={checkData.title}
                                     type="checkbox"
                                     onChange={(e) => handleSingleCheck(e.target.checked, checkData.id)}

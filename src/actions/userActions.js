@@ -3,10 +3,13 @@ import {
     USER_LOGIN_FAIL,
     USER_LOGIN_REQUEST,
     USER_LOGIN_SUCCESS,
-    USER_SIGNUP_REQUEST
+    USER_LOGOUT,
+    USER_SIGNUP_REQUEST,
+    USER_SIGNUP_SUCCESS,
+    USER_SIGNUP_FAIL
 } from "../constants/userConstants";
 
-const login = (email, password) => async (dispatch) => {
+export const login = (email, password) => async (dispatch) => {
 
     try {
         dispatch({
@@ -36,7 +39,7 @@ const login = (email, password) => async (dispatch) => {
 
 }
 
-const signup = (email, password) => async (dispatch) => {
+export const signup = (email, password, username, phone) => async (dispatch) => {
 
     try {
 
@@ -44,15 +47,32 @@ const signup = (email, password) => async (dispatch) => {
             type : USER_SIGNUP_REQUEST,
         })
 
-        const {data} = await axios.post(
+        const {data, status} = await axios.post(
             'http://localhost:3000/api/auth/signup',
-            { email, password }
+            { email, password, username, phone }
         )
 
+        dispatch({
+            type : USER_SIGNUP_SUCCESS,
+            payload : data
+        })
+
+        // localStorage.setItem('isSignup', true) => 굳이 안해도 됨.
+
     } catch (err) {
-        console.log(err.message)
+        dispatch ({
+            type : USER_SIGNUP_FAIL,
+            payload :
+                err.response && err.response.data.message
+                    ? err.response.data.message
+                    : err.message
+        })
     }
 
 }
 // 액션까지만 회원가입 넣기
-export {login}
+export const logout = () => (dispatch) => {
+    localStorage.removeItem('userInfo')
+    dispatch({ type : USER_LOGOUT })
+    document.location.href = '/login'
+}
